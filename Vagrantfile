@@ -13,31 +13,27 @@ Vagrant.configure("2") do |config|
   # Every Vagrant development environment requires a box. You can search for
   # boxes at https://vagrantcloud.com/search.
   config.vm.box = "geerlingguy/rockylinux8"
-  config.vm.provision "shell", inline:<<-SHELL
-    dnf update
-    ip address
-  SHELL
+  config.ssh.insert_key = false
+  config.vm.synced_folder ".", "/vagrant", disabled: true
   config.vm.provider "virtualbox" do |v|
     v.memory = 512
+    v.linked_clone = true
     v.cpus = 1
   end
 
-  config.vm.define "web", primary:true do |web|
-    web.vm.network "private_network", ip: "192.168.56.1"
-    web.vm.hostname = "web"
-    web.vm.provision :ansible do |ansible|
-      ansible.playbook = "playbook_new.yml"
-    end
+  config.vm.define "app1"  do |app|
+    app.vm.network "private_network", ip: "192.168.56.1"
+    app.vm.hostname = "orc-app1.test"
   end
 
+  config.vm.define "app2"  do |app|
+    app.vm.network "private_network", ip: "192.168.56.2"
+    app.vm.hostname = "orc-app2.test"
+  end
 
-
-  config.vm.define "host1"  do |host1|
-    host1.vm.network "private_network", ip: "192.168.56.2"
-    host1.vm.hostname = "host1"
-    host1.vm.provision :ansible do |host1|
-      host1.playbook = "playbook.yml"
-    end
+  config.vm.define "db"  do |db|
+    db.vm.network "private_network", ip: "192.168.56.3"
+    db.vm.hostname = "orc-db.test"
   end
 end
 
